@@ -1,0 +1,20 @@
+@ \paragraph{This is paragraph title} This is paragraph body
+
+Some more paragraph
+
+<<main.js>>=
+<<example function>>
+<<another example function>>
+
+@ This is an example function
+
+<<example function>>=
+function ex(cake){
+  console.log('cake: ', cake);
+}
+
+@ This is another example function
+<<another example function>>=
+function anEx(fish){
+  return fish + 1;
+}
