@@ -1,4 +1,9 @@
-@ \paragraph{This is paragraph title} This is paragraph body
+# Some Cool code
+
+## Coool maaan
+
+####This is paragraph title
+This is paragraph body
 
 Some more paragraph
 
@@ -16,7 +21,8 @@ function anEx(fish){
   return fish + 1;
 }
 
-@ \paragraph{The Real Deal} This is the actual code.
+@####The Real Deal 
+This is the actual code.
 Enjoy!
 <<main.js>>=
 <<example function>>
