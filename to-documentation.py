@@ -120,6 +120,7 @@ if fileName is not None:
                             # print 'DEBUG: >>= i: ' + str(i)
                             # new code block definition
                             # print 'DEBUG: new code block: ' + CodeBlockName
+                            break
                         else: # does not end in =, it's just a reference
                             if (docType == 'md') and (Mode == 'code'):
                               sys.stdout.write('    ' + line)
@@ -129,6 +130,7 @@ if fileName is not None:
                             CodeBlockName = previousCodeBlockName # set the code-block name back to what it was
                             # print 'DEBUG: >> not = i: ' + str(i)
                             # print 'DEBUG: embed code'
+                            break
                     else: # does not have second > of >>
                         CodeBlockName += line[i]
                 else: # does not have second > of >>

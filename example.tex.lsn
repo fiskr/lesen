@@ -19,5 +19,7 @@ function anEx(fish){
 @ \paragraph{The Real Deal} This is the actual code.
 Enjoy!
 <<main.js>>=
+// This is example function:
 <<example function>>
-<<another example function>>
+// This is another example function:
+<<Another Example Function>>
