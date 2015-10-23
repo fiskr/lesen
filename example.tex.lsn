@@ -11,15 +11,19 @@ function ex(cake){
 }
 
 @ This is another example function
+Notice the fish:
 <<Another Example Function>>=
 function anEx(fish){
   return fish + 1;
+@ Here is an extension of another example function:
+<<Another Example Function>>=
+//This is a continuation of another example function:
 }
 
 @ \paragraph{The Real Deal} This is the actual code.
 Enjoy!
 <<main.js>>=
 // This is example function:
-<<example function>>
+  <<example function>>
 // This is another example function:
-<<Another Example Function>>
+    <<Another Example Function>> // this is a boring example
