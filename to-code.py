@@ -49,7 +49,8 @@ if fileName is not None:
                         # print 'DEBUG: >> i: ' + str(i)
                         if (line[i] == '='): # it's an addition
                             Mode = 'code'
-                            codeChunks[CodeBlockName] = []
+                            if CodeBlockName not in codeChunks:
+                                codeChunks[CodeBlockName] = []
                             #sys.stdout.write(line)
                             # print 'DEBUG: >>= i: ' + str(i)
                             # new code block definition
