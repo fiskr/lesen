@@ -72,15 +72,18 @@ if fileName is not None:
             if (Mode == 'code') and (CodeBlockName is not None) and (CodeBlockName != ''):
                 codeChunks[CodeBlockName].append(line)
     for chunk in codeChunks[MasterBlockName]:
-        codeChunkMatches = re.match('<<([^>]+)>>', chunk)
+        codeChunkMatches = re.match('^.*<<([^>]+)>>.*$', chunk)
+        surroundingMatches = re.match('^(.*?)<<[^>]+>>(.*)$', chunk)
         if codeChunkMatches is not None:
             codeChunkReferenceNames = codeChunkMatches.groups()
+            referencePadding = surroundingMatches.groups()
             if (codeChunkReferenceNames is not None) and (len(codeChunkReferenceNames) > 0):
                 for line in codeChunks[codeChunkReferenceNames[0]]:
+                    if (referencePadding is not None) and (len(referencePadding) > 0):
+                        sys.stdout.write(referencePadding[0])
                     # print codeChunkReferenceNames
                     # print codeChunks[codeChunkReferenceNames[0]]
                     sys.stdout.write(line)
-                    # print 'this is a referenced line'
         else:
             sys.stdout.write(chunk)
 
