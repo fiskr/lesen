@@ -41,28 +41,20 @@ if fileName is not None:
             CodeBlockName = ""
 
             for i in range(2,len(line)): # parse out the name of the code chunk
-                #print 'i: ' + str(i)
                 if (line[i] == '>'): # check to see if it's the end of the name chunk
                     i += 1
                     if (line[i] == '>'): # it's either a reference or an addition to code chunk
                         i += 1
-                        # print 'DEBUG: >> i: ' + str(i)
                         if (line[i] == '='): # it's an addition
                             Mode = 'code'
                             if CodeBlockName not in codeChunks:
                                 codeChunks[CodeBlockName] = []
-                            #sys.stdout.write(line)
-                            # print 'DEBUG: >>= i: ' + str(i)
-                            # new code block definition
-                            # print 'DEBUG: new code block: ' + CodeBlockName
                             break
                         else: # does not end in =, it's just a reference
                             referenceCodeBlockName = CodeBlockName # save the reference code-block name as such
                             CodeBlockName = previousCodeBlockName # set the code-block name back to what it was
                             codeChunks[CodeBlockName].append(line)
                             break
-                            # print 'DEBUG: >> not = i: ' + str(i)
-                            # print 'DEBUG: embed code'
                     else: # does not have second > of >>
                         CodeBlockName += line[i]
                 else: # does not have second > of >>
@@ -72,21 +64,20 @@ if fileName is not None:
         else: # does not start with << or @
             if (Mode == 'code') and (CodeBlockName is not None) and (CodeBlockName != ''):
                 codeChunks[CodeBlockName].append(line)
-    for chunk in codeChunks[MasterBlockName]:
-        codeChunkMatches = re.match('^.*<<([^>]+)>>.*$', chunk)
-        surroundingMatches = re.match('^(.*?)<<[^>]+>>(.*)$', chunk)
-        if codeChunkMatches is not None:
-            codeChunkReferenceNames = codeChunkMatches.groups()
-            referencePadding = surroundingMatches.groups()
-            if (codeChunkReferenceNames is not None) and (len(codeChunkReferenceNames) > 0):
-                for line in codeChunks[codeChunkReferenceNames[0]]:
-                    if (referencePadding is not None) and (len(referencePadding) > 0):
-                        sys.stdout.write(referencePadding[0])
-                    # print codeChunkReferenceNames
-                    # print codeChunks[codeChunkReferenceNames[0]]
-                    sys.stdout.write(line)
-        else:
-            sys.stdout.write(chunk)
+
+    def processChunk(codeChunkName):
+        for chunk in codeChunks[codeChunkName]:
+            codeChunkMatches = re.match('^.*<<([^>]+)>>.*$', chunk)
+            surroundingMatches = re.match('^(.*?)<<[^>]+>>(.*)$', chunk)
+            if codeChunkMatches is not None:
+                codeChunkReferenceNames = codeChunkMatches.groups() # even though it's "names", you should expect only one group - use item [0]
+                referencePadding = surroundingMatches.groups()
+                if (codeChunkReferenceNames is not None) and (len(codeChunkReferenceNames) > 0):
+                    processChunk(codeChunkReferenceNames[0])
+            else:
+                sys.stdout.write(chunk)
+
+    processChunk(MasterBlockName)
 
     file.close()
 
