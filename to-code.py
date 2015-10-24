@@ -65,17 +65,18 @@ if fileName is not None:
             if (Mode == 'code') and (CodeBlockName is not None) and (CodeBlockName != ''):
                 codeChunks[CodeBlockName].append(line)
 
-    def processChunk(codeChunkName):
+    def processChunk(codeChunkName, prefixPadding=""):
         for chunk in codeChunks[codeChunkName]:
             codeChunkMatches = re.match('^.*<<([^>]+)>>.*$', chunk)
             surroundingMatches = re.match('^(.*?)<<[^>]+>>(.*)$', chunk)
+            if surroundingMatches is not None:
+                referencePadding = surroundingMatches.groups()
             if codeChunkMatches is not None:
                 codeChunkReferenceNames = codeChunkMatches.groups() # even though it's "names", you should expect only one group - use item [0]
-                referencePadding = surroundingMatches.groups()
                 if (codeChunkReferenceNames is not None) and (len(codeChunkReferenceNames) > 0):
-                    processChunk(codeChunkReferenceNames[0])
+                    processChunk(codeChunkReferenceNames[0], prefixPadding + referencePadding[0])
             else:
-                sys.stdout.write(chunk)
+                sys.stdout.write(prefixPadding + chunk)
 
     processChunk(MasterBlockName)
 
