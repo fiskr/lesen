@@ -1,0 +1,191 @@
+# To-Code
+
+The title is pretty straight forward- to-code.py converts a `.lsn` file into a source file.
+
+This very `to-code.lsn` file can be exported to `to-code.py`.
+
+In the world of literate programming, this would be the equivalent of "tangling", like noweb's `notangle`.
+
+Let's take a look at the code.
+
+
+##imports
+
+    import sys
+    import re
+    import argparse
+
+I tried to keep the imports to a minimum.
+A large part of the motivation for writing this is due to the complexity or difficulties getting other literate programming tools to build or pull in the proper dependencies.
+I wanted something very simple that just works, and there didn't seem to be a good option for that.
+
+##parse arguments
+
+    # get the arguments from the command line
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument("-f", "--filename", help="lesen source file to be converted to code")
+    
+    parser.add_argument("-n", "--blockname", help="the top level code block to export to the source file")
+    
+    args = parser.parse_args()
+
+Here we parse out the command line arguments that might be passed into `to-code.py`.
+The `--blockname` might be a bit confusing.
+
+As far as I can tell, the way tangle works is that you have a root code block which will at some point reference some of the other code blocks which then would work to be an exported file.
+The default root block is `<<*>>=`, if one is not specified. This standard is set by my observations of how noweb works.
+
+The `--blockname` option allows the user to specify a different root code block.
+
+
+##global variables
+
+    if args.blockname is not None:
+        MasterBlockName = args.blockname
+    else:
+        MasterBlockName = "*"
+    
+    if args.filename is not None:
+        fileName = args.filename
+    
+    # Global vars
+    CodeBlockName = ''
+    Mode = 'document'
+    
+    # blindly going to use a dictionary to store the  code chunks
+    # this might need to be changed later
+    
+    codeChunks = {}
+
+
+The global variables pull from the arguments that were passed in, and a few are generic logic keypoints.
+
+This program "interprets" lesen files line by line.
+`Mode` keeps track of whether the line being interpreted is part of a document block or a code block.
+`CodeBlockName` keeps track of which code block the line being interpreted is in.
+
+`codeChunks` is a dictionary of all the code chunks that are defined for the file.
+`to-code.py` processes the lesen file once over to produce the codeChunks dictionary before it outputs the codeChunks
+
+
+##process input
+
+    if fileName is not None:
+        file = open(fileName)
+        for line in file: # run through the document once to setup the code chunks
+            generateCodeChunks(line)
+        file.close()
+    else:
+        for line in sys.stdin:
+            generateCodeChunks(line)
+
+Here we either open up a file, or we take lines from standard input.
+It feels like there should be a better way to write this such that I don't have to repeat `generateCodeChunks` twice like this.
+
+
+##generate code chunks function
+
+    # create dictionary made up of code chunks processed from each line of input
+    def generateCodeChunks(line):
+        # TODO: remove the reliance on Globals and global declarations
+        global CodeBlockName
+        global Mode
+        global codeChunks
+        if (line[0] == '@'):
+            Mode = 'document'
+        elif (line[0] == '<') and (line[1] == '<'):
+            <<parse code chunk name>>
+        else: # does not start with << or @
+            if (Mode == 'code') and (CodeBlockName is not None) and (CodeBlockName != ''):
+                codeChunks[CodeBlockName].append(line)
+
+
+Talking about `generateCodeChunks`, this function is called for each line.
+It checks to see whether to include the current line as a piece of a code chunk, or to exclude it because it's documentation.
+If the line starts with <<, then we try to parse out a name from the next characters:
+
+##parse code chunk name
+
+    previousCodeBlockName = CodeBlockName # backup the code block name
+    CodeBlockName = ""
+    
+    for i in range(2,len(line)): # parse out the name of the code chunk
+        if (line[i] == '>'): # check to see if it's the end of the name chunk
+            i += 1
+            if (line[i] == '>'): # it's either a reference or an addition to code chunk
+                i += 1
+                if (line[i] == '='): # it's an addition
+                    Mode = 'code'
+                    if CodeBlockName not in codeChunks:
+                        codeChunks[CodeBlockName] = []
+                    break
+                else: # does not end in =, it's just a reference
+                    referenceCodeBlockName = CodeBlockName # save the reference code-block name as such
+                    CodeBlockName = previousCodeBlockName # set the code-block name back to what it was
+                    if Mode == 'code':
+                      codeChunks[CodeBlockName].append(line)
+                    break
+            else: # does not have second > of >>
+                CodeBlockName += line[i]
+                if i == len(line): # if we haven't reached our second > of >>, it's not a code chunk
+                  CodeBlockName = previousCodeBlockName
+                  if Mode == 'code':
+                    codeChunks[CodeBlockName].append(line)
+                  break
+        else: # does not have second > of >>
+            CodeBlockName += line[i]
+            if i == len(line): # if we haven't reached our second > of >>, it's not a code chunk
+              CodeBlockName = previousCodeBlockName
+              if Mode == 'code':
+                codeChunks[CodeBlockName].append(line)
+              break
+
+Each time we parse, we backup the previous name (in case the parsing fails).
+
+It really should handle the edge case of someone starting with <<, but not ending it within a code chunk.
+Unfortunately, this part of the logic is duplicated, which is daft.
+
+Essentially, if you find an instance like `<<X>>=`, you look for instances of `X` in your dictionary and initialize if it hasn't already been.
+
+If you find an instance of `<<Y>>`, then you append this reference line to the code block you were in, if that line was within a code block at all.
+
+If you find neither instances, then you set your code block name back to how it was previously; and, if this is within a code block, you add this line to it.
+
+##output code chunks
+
+    def processChunk(codeChunkName):
+        for chunk in codeChunks[codeChunkName]:
+            codeChunkMatches = re.match('^.*<<([^>]+)>>.*$', chunk)
+            surroundingMatches = re.match('^(.*?)<<[^>]+>>(.*)$', chunk)
+            if codeChunkMatches is not None:
+                codeChunkReferenceNames = codeChunkMatches.groups() # even though it's "names", you should expect only one group - use item [0]
+                referencePadding = surroundingMatches.groups()
+                if (codeChunkReferenceNames is not None) and (len(codeChunkReferenceNames) > 0):
+                    processChunk(codeChunkReferenceNames[0])
+            else:
+                sys.stdout.write(chunk)
+    
+    processChunk(MasterBlockName)
+
+Finally, once we have each code block defined in our dictionary, we can go about outputting it.
+
+We have to have a root code block, referenced by the `MasterBlockName`.
+By default this is `*`, but you can use `-n` or `--blockname` to specify your own block name.
+
+For each line in the code chunk, we check to see if there is a reference to another block.
+If there is a reference, we use regex to parse out the name and recursively call the `processChunk` function with this new name.
+
+We kick off the whole process with a call to `processChunk` using the root chunk name, `MasterBlockName` as the first chunk to output.
+
+##to-code.py
+
+    <<imports>>
+    <<parse arguments>>
+    <<global variables>>
+    <<generate code chunks function>>
+    <<process input>>
+    <<output code chunks>>
+
+
+Finally, we have the program as a whole.
