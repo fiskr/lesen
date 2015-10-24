@@ -1,9 +1,6 @@
-
 import sys
 import re
 import argparse
-from pprint import pprint # take this out before releasing - this is for tests
-
 # get the arguments from the command line
 parser = argparse.ArgumentParser()
 
@@ -12,7 +9,6 @@ parser.add_argument("-f", "--filename", help="lesen source file to be converted 
 parser.add_argument("-n", "--blockname", help="the top level code block to export to the source file")
 
 args = parser.parse_args()
-
 if args.blockname is not None:
     MasterBlockName = args.blockname
 else:
@@ -31,20 +27,18 @@ Mode = 'document'
 # this might need to be changed later
 
 codeChunks = {}
-
 # create dictionary made up of code chunks processed from each line of input
 def generateCodeChunks(line):
-    # print 'DEBUG: generateCodeChunks: Line: ' + line
+    # TODO: remove the reliance on Globals and global declarations
     global CodeBlockName
     global Mode
     global codeChunks
     if (line[0] == '@'):
-        # print 'DEBUG: Document Mode Engaged! (generateCodeChunks)'
         Mode = 'document'
-    if (line[0] == '<') and (line[1] == '<'):
+    elif (line[0] == '<') and (line[1] == '<'):
         previousCodeBlockName = CodeBlockName # backup the code block name
         CodeBlockName = ""
-
+        
         for i in range(2,len(line)): # parse out the name of the code chunk
             if (line[i] == '>'): # check to see if it's the end of the name chunk
                 i += 1
@@ -53,33 +47,39 @@ def generateCodeChunks(line):
                     if (line[i] == '='): # it's an addition
                         Mode = 'code'
                         if CodeBlockName not in codeChunks:
-                            # print 'DEBUG: CodeBlockName: ' + CodeBlockName + ' is not in codeChunks: ' + str(codeChunks)
                             codeChunks[CodeBlockName] = []
                         break
                     else: # does not end in =, it's just a reference
                         referenceCodeBlockName = CodeBlockName # save the reference code-block name as such
                         CodeBlockName = previousCodeBlockName # set the code-block name back to what it was
-                        codeChunks[CodeBlockName].append(line)
+                        if Mode == 'code':
+                          codeChunks[CodeBlockName].append(line)
                         break
                 else: # does not have second > of >>
                     CodeBlockName += line[i]
+                    if i == len(line): # if we haven't reached our second > of >>, it's not a code chunk
+                      CodeBlockName = previousCodeBlockName
+                      if Mode == 'code':
+                        codeChunks[CodeBlockName].append(line)
+                      break
             else: # does not have second > of >>
                 CodeBlockName += line[i]
+                if i == len(line): # if we haven't reached our second > of >>, it's not a code chunk
+                  CodeBlockName = previousCodeBlockName
+                  if Mode == 'code':
+                    codeChunks[CodeBlockName].append(line)
+                  break
     else: # does not start with << or @
         if (Mode == 'code') and (CodeBlockName is not None) and (CodeBlockName != ''):
-            # print 'DEBUG: appending to code chunk: ' + CodeBlockName
             codeChunks[CodeBlockName].append(line)
-
 if fileName is not None:
     file = open(fileName)
     for line in file: # run through the document once to setup the code chunks
-        # print 'DEBUG: Line: ' + line
         generateCodeChunks(line)
     file.close()
 else:
     for line in sys.stdin:
         generateCodeChunks(line)
-
 def processChunk(codeChunkName, prefixPadding=""):
     global codeChunks
     for chunk in codeChunks[codeChunkName]:
@@ -95,6 +95,3 @@ def processChunk(codeChunkName, prefixPadding=""):
             sys.stdout.write(prefixPadding + chunk)
 
 processChunk(MasterBlockName)
-#
-# codeChunks
-# pprint(codeChunks)
