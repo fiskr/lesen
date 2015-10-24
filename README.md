@@ -7,6 +7,11 @@
 
 - Takes syntax cues from noweb (see the Syntax section)
 
+	This is great because literate programmers will hopefully be familiar with this format.
+
+	It also permits you to use tools intended for literate programming.	
+	For example, you can use [my fork](https://github.com/fiskr/language-literate) of [this literate syntax highlighting Atom package](https://atom.io/packages/language-literate) 
+
 - Accepts standard input as well as filename
 
   This was an important feature, to match [Unix philosophy](http://www.faqs.org/docs/artu/ch01s06.html):
@@ -20,18 +25,16 @@
   What you write is output.
   Document type is only assumed if you specify it or name your file accordingly.
 
+
+### to-documentation.py
+
 - LaTeX and Markdown modes
 
   You can specify a document type, and lesen will handle formatting code blocks for you, among other things including LaTeX's preamble.
 
-### to-documentation.py
-
 #### Examples of Use
 
-##### To Generate Documentation (Weaving)
-
     # Here the documentation is produced from standard input
-    #
     cat file.lsn | python to-documentation.py -t md > file.md
 
     # You can also specify the filename with a parameter
@@ -41,13 +44,16 @@
 
 
 
-##### To Generate Code (Tangling)
+#### Examples of Use
 
     # you can use standard input for to-code as well
     cat file.lsn | python to-code.py > file.js
 
     # if you want to specify a different root code block, use -n or --blockname
     python -f file.lsn -n main > file.js
+
+		# This is how I generated to-code/src/to-code.py:
+		python to-code.py -f to-code.lsn -n to-code.py > src/to-code.py
 
 
 
