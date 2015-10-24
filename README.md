@@ -3,6 +3,57 @@
 [Lesen](https://en.wiktionary.org/wiki/lesen#German) is a literate programming tool.
 
 
+## Features and Behaviors
+
+- Takes syntax cues from noweb (see the Syntax section)
+
+- Accepts standard input as well as filename
+
+  This was an important feature, to match [Unix philosophy](http://www.faqs.org/docs/artu/ch01s06.html):
+  > Write programs to handle text streams, because that is a universal interface
+  > - Doug McIlroy
+
+- Produces standard output
+
+- Language agnostic, document-type agnostic
+
+  What you write is output.
+  Document type is only assumed if you specify it or name your file accordingly.
+
+- LaTeX and Markdown modes
+
+  You can specify a document type, and lesen will handle formatting code blocks for you, among other things including LaTeX's preamble.
+
+### to-documentation.py
+
+#### Examples of Use
+
+##### To Generate Documentation (Weaving)
+
+    # Here the documentation is produced from standard input
+    #
+    cat file.lsn | python to-documentation.py -t md > file.md
+
+    # You can also specify the filename with a parameter
+    python to-documentation.py -f file.lsn -t md > file.md
+
+### to-code.py
+
+
+
+##### To Generate Code (Tangling)
+
+    # you can use standard input for to-code as well
+    cat file.lsn | python to-code.py > file.js
+
+    # if you want to specify a different root code block, use -n or --blockname
+    python -f file.lsn -n main > file.js
+
+
+
+
+
+
 ## Syntax
 
 The syntax takes after noweb.
@@ -31,6 +82,8 @@ The default root code block is `<<*>>=` just like with noweb.
     <<main.js>>=
       // this references the above code block
       <<this is a code block>>
+
+I have yet to implement noweb's `[[ ... ]]` syntax for simplified inline-code styling.
 
 
 ## Why Another?
@@ -100,7 +153,7 @@ No makefiles, no complexity - just simple, easy, and type-agnostic.
 
 In the end, I was dissatisfied. I wanted something super easy to use. Not just that, but the promises of literate programming meant that our tools should be _more_ accessible, and easier to learn and understand.
 
-Why did every tool I tried seem to quickly jump off the deep end into dependencies, abstractions, and jargon. Why create such high-context words for `weave` to mean "generate documentation" or `tangle` to mean "extract code"?
+Why did every tool I tried seem to quickly jump off the deep end into dependencies, abstractions, and jargon. Why create such high-context words such as `weave` to mean "generate documentation" or `tangle` to mean "extract code"?
 I wanted something more accessible - something low-context.
 
 Driving home, my mind kept wandering to this problem and I began to fantasize writing my own tool.
@@ -113,3 +166,10 @@ There are probably many bugs left lurking, waiting for me to find.
 There are definitely better ways to write the same code, and package it in modules that are simple and powerful.
 
 But in the end, I solved my problem. Now literate programming is easy, and I hope, more accessible.
+
+
+## TODO:
+
+- Add command line option for directing output to a file, like `curl`'s `-o`
+
+- Modularize the logic, break them out into independent modules to be referenced by both scripts
