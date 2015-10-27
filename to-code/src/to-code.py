@@ -71,6 +71,9 @@ def generateCodeChunks(line):
                   break
     else: # does not start with << or @
         if (Mode == 'code') and (CodeBlockName is not None) and (CodeBlockName != ''):
+          if (line [0] == '\\') and (line [1] == '@'):
+            codeChunks[CodeBlockName].append(line[1:]) # if escaping a document symbol, paste the code without the slash before the @
+          else:
             codeChunks[CodeBlockName].append(line)
 if fileName is not None:
     file = open(fileName)
