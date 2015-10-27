@@ -64,11 +64,21 @@
 
 The syntax takes after noweb.
 
-`@` is used to start a document block
+### Document Blocks
+
+`@` is used to start a document block. 
+
+It has to be the first character of that line, and it will remain a document block until there is a code block definition (`<< ... >>=`).
+
+If you need to use @ as the first character in a line of a code block, you can escape it with a backslash, e.g. `\@`. (It will output `@` and not `\@`).
+
+### Code Chunks
+
 `<< ... >>=` is used to start a code block, where `...` designates the name of that block to be referenced later.
 
 The default root code block is `<<*>>=` just like with noweb.
 
+#### References to Code Chunks
 `<< ... >>` can be used in a code block to reference another code block
 
     @ this is a document block
