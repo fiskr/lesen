@@ -48,6 +48,8 @@ The `--blockname` option allows the user to specify a different root code block.
     
     if args.filename is not None:
         fileName = args.filename
+    else:
+        fileName = None
     
     # Global vars
     CodeBlockName = ''
@@ -98,6 +100,9 @@ It feels like there should be a better way to write this such that I don't have 
             <<parse code chunk name>>
         else: # does not start with << or @
             if (Mode == 'code') and (CodeBlockName is not None) and (CodeBlockName != ''):
+              if (line [0] == '\\') and (line [1] == '@'):
+                codeChunks[CodeBlockName].append(line[1:]) # if escaping a document symbol, paste the code without the slash before the @
+              else:
                 codeChunks[CodeBlockName].append(line)
 
 
@@ -154,17 +159,19 @@ If you find neither instances, then you set your code block name back to how it 
 
 ##output code chunks
 
-    def processChunk(codeChunkName):
+    def processChunk(codeChunkName, prefixPadding=""):
+        global codeChunks
         for chunk in codeChunks[codeChunkName]:
-            codeChunkMatches = re.match('^.*<<([^>]+)>>.*$', chunk)
-            surroundingMatches = re.match('^(.*?)<<[^>]+>>(.*)$', chunk)
+            codeChunkMatches = re.match('^.*<<([^>]+)>>[^=]{1}.*$', chunk) # [^=]{1} because we need to know it's a reference, not a definition
+            surroundingMatches = re.match('^(.*?)<<[^>]+>>([^=]{1}.*)$', chunk)
+            if surroundingMatches is not None:
+                referencePadding = surroundingMatches.groups()
             if codeChunkMatches is not None:
                 codeChunkReferenceNames = codeChunkMatches.groups() # even though it's "names", you should expect only one group - use item [0]
-                referencePadding = surroundingMatches.groups()
                 if (codeChunkReferenceNames is not None) and (len(codeChunkReferenceNames) > 0):
-                    processChunk(codeChunkReferenceNames[0])
+                    processChunk(codeChunkReferenceNames[0], prefixPadding + referencePadding[0])
             else:
-                sys.stdout.write(chunk)
+                sys.stdout.write(prefixPadding + chunk)
     
     processChunk(MasterBlockName)
 
