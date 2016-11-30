@@ -1,3 +1,5 @@
+NOTE: THIS IS NOT YET READY TO BE CONVERTED TO CODE, DON'T OVERRIDE to-documentation/src/to-documentation.py WITH THIS!
+
 # To-Documentation
 
 To-Documentation produces a document from a lesen or literate programming file. To learn more about the syntax and features of this program, read the README.
@@ -129,7 +131,7 @@ Header = ""
 Footer = ""
 DocType = None
 # compile regex for multiple uses to save memory
-# tagsRegex = re.compile(r"") 
+# tagsRegex = re.compile(r"")
 
 # start in document Mode
 Mode = 'document' # document or code
