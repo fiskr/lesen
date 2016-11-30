@@ -164,12 +164,6 @@ elif (DocType == 'md'):
         heading = '#' * (MarkDownHeadingLevel + 1)
         return heading + codeBlockName + '\n'
 
-    # ``` oriented markdown, Github's flavor
-    # def startCode(codeBlockName):
-    #     heading = '#' * (MarkDownHeadingLevel + 1)
-    #     return heading + codeBlockName + '\n```'
-    # EndCode = '```'
-
 elif (DocType == 'default'):
     def startCode(codeBlockName):
         return '<<' + codeBlockName + '>>='

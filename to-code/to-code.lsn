@@ -155,8 +155,8 @@ If you find neither instances, then you set your code block name back to how it 
 def processChunk(codeChunkName, prefixPadding=""):
     global codeChunks
     for chunk in codeChunks[codeChunkName]:
-        codeChunkMatches = re.match('^.*<<([^>]+)>>.*$', chunk)
-        surroundingMatches = re.match('^(.*?)<<[^>]+>>(.*)$', chunk)
+        codeChunkMatches = re.match('^.*<<([^>]+)>>[^=]{1}.*$', chunk) # [^=]{1} because we need to know it's a reference, not a definition
+        surroundingMatches = re.match('^(.*?)<<[^>]+>>([^=]{1}.*)$', chunk)
         if surroundingMatches is not None:
             referencePadding = surroundingMatches.groups()
         if codeChunkMatches is not None:

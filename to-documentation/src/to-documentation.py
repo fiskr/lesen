@@ -1,4 +1,3 @@
-
 import sys
 import re
 import argparse
@@ -9,6 +8,9 @@ EndCode = ""
 Header = ""
 Footer = ""
 DocType = None
+# compile regex for multiple uses to save memory
+# tagsRegex = re.compile(r"") 
+
 # start in document Mode
 Mode = 'document' # document or code
 Choices = ['tex', 'md']
@@ -18,12 +20,9 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("-f", "--filename", help="lesen source file to be converted to documentation or code")
 
-parser.add_argument("-t", "--doctype", help="the type of document to export to",
-                        choices=Choices)
+parser.add_argument("-t", "--doctype", help="the type of document to export to", choices=Choices)
 
 args = parser.parse_args()
-
-
 
 if args.filename is not None:
     fileName = args.filename
@@ -41,9 +40,6 @@ if args.doctype is not None:
 else:
     if DocType is None:
         DocType = 'default'
-
-
-
 
 if (DocType == 'tex'):
     Header = """\\documentclass{article}
@@ -72,12 +68,6 @@ elif (DocType == 'md'):
         heading = '#' * (MarkDownHeadingLevel + 1)
         return heading + codeBlockName + '\n'
 
-    # ``` oriented markdown, Github's flavor
-    # def startCode(codeBlockName):
-    #     heading = '#' * (MarkDownHeadingLevel + 1)
-    #     return heading + codeBlockName + '\n```'
-    # EndCode = '```'
-
 elif (DocType == 'default'):
     def startCode(codeBlockName):
         return '<<' + codeBlockName + '>>='
@@ -95,6 +85,8 @@ def processLine(line):
     global CodeBlockName
     global DocType
     global startCode
+    codeChunkMatches = re.match('^.*<<([^>]+)>>(.?).*$', chunk)
+
     if (line[0] == '@'): # if document block starts
         if (Mode == 'code'):
             sys.stdout.write(EndCode) # if latex, end code block formatting
@@ -102,9 +94,25 @@ def processLine(line):
             MarkDownHeadingLevel = iterateMarkdownHeadingLevel(2, line)
         sys.stdout.write(line[1:])
         Mode = 'document'
-    elif (line[0] == '<') and (line[1] == '<'):
+    elif codeChunkMatches is not None:
+        codeChunkReferenceNames = codeChunkMatches.groups() # even though it's called "names", the chunk name is the first item
         previousCodeBlockName = CodeBlockName # backup the code block name
         CodeBlockName = ""
+        if (codeChunkReferenceNames is not None) and (len(codeChunkReferenceNames) > 0):
+          CodeBlockName = codeChunkReferenceNames[0]
+          if len(codeChunkReferenceNames) > 1 and codeChunkReferenceNames[0] == "=":
+              Mode = 'code'
+              print(startCode(CodeBlockName))
+              break
+          else: # does not end in =, it's just a reference to a code chunk
+              if (DocType == 'md') and (Mode == 'code'):
+                sys.stdout.write('    ' + line)
+              else:
+                sys.stdout.write(line)
+              referenceCodeBlockName = CodeBlockName # save the reference code-block name as such
+              CodeBlockName = previousCodeBlockName # set the code-block name back to what it was
+              break
+
 
         for i in range(2,len(line)): # parse out the name of the code chunk
             if (line[i] == '>'): # check to see if it's the end of the name chunk
@@ -129,7 +137,7 @@ def processLine(line):
                 CodeBlockName += line[i]
 
 
-    else: # does not start with << or @
+    else: # line does not start with << or @
             if (line[0] == '#') and (DocType == 'md'):
                 MarkDownHeadingLevel = iterateMarkdownHeadingLevel(1, line)
             if (DocType == 'md') and (Mode == 'code'):
