@@ -9,6 +9,7 @@ EndCode = ""
 Header = ""
 Footer = ""
 DocType = None
+LanguageExtensionRegex = re.compile(r"((coffee-?(script)?)|(javascript|js)|(markdown|mdown|md)|(json)|(css)|(less)|(xml)|(ruby|rb)|(java)|(erlang)|(cs(harp)?)|(php)|(sh|bash)|(py(thon)?)|(c)|(c(pp|\+\+))|(objc|objective-c)|(html)|(ya?ml)|(elixir)):[ ]?", re.IGNORECASE)
 # start in document Mode
 Mode = 'document' # document or code
 Choices = ['tex', 'md']
@@ -70,7 +71,8 @@ elif (DocType == 'md'):
     MarkDownHeadingLevel = 1
     def startCode(codeBlockName):
         heading = '#' * (MarkDownHeadingLevel + 1)
-        return heading + codeBlockName + '\n'
+        blockWithoutLangExt = LanguageExtensionRegex.sub(" ", codeBlockName).title()
+        return heading + blockWithoutLangExt + '\n'
 
     # ``` oriented markdown, Github's flavor
     # def startCode(codeBlockName):
@@ -129,7 +131,7 @@ def processLine(line):
                 CodeBlockName += line[i]
 
 
-    else: # does not start with << or @
+    else: # line does not start with << or @
             if (line[0] == '#') and (DocType == 'md'):
                 MarkDownHeadingLevel = iterateMarkdownHeadingLevel(1, line)
             if (DocType == 'md') and (Mode == 'code'):

@@ -1,6 +1,6 @@
 # Lesen
 
-[Lesen](https://en.wiktionary.org/wiki/lesen#German) is a literate programming tool.
+[Lesen](https://en.wiktionary.org/wiki/lesen#German), pronounced /ˈleːzn̩/, is a literate programming tool used to create code and documentation from the same source.
 
 
 ## Features and Behaviors
@@ -9,8 +9,8 @@
 
 	This is great because literate programmers will hopefully be familiar with this format.
 
-	It also permits you to use tools intended for literate programming.	
-	For example, you can use [my fork](https://github.com/fiskr/language-literate) of [this literate syntax highlighting Atom package](https://atom.io/packages/language-literate) 
+	It also permits you to use tools intended for literate programming.
+	For example, you can use [my fork](https://github.com/fiskr/language-literate) of [this literate syntax highlighting Atom package](https://atom.io/packages/language-literate)
 
 - Accepts standard input as well as filename
 
@@ -66,7 +66,7 @@ The syntax takes after noweb.
 
 ### Document Blocks
 
-`@` is used to start a document block. 
+`@` is used to start a document block.
 
 It has to be the first character of that line, and it will remain a document block until there is a code block definition (`<< ... >>=`).
 
@@ -101,6 +101,21 @@ The default root code block is `<<*>>=` just like with noweb.
 
 I have yet to implement noweb's `[[ ... ]]` syntax for simplified inline-code styling.
 
+#### Syntax Highlighting
+
+You likely want syntax highlighting for both the code chunks and the document chunks.
+
+If you use Github's open source editor, [Atom](https://atom.io/), there is an excellent package named [language-literate](https://github.com/Kerrigan29a/language-literate) you may install. It uses syntax like `<<js: for loop>>=` to tell how to style the code chunk. Lesen's to-documentation tool should ignore these "tags" when rendering titles from the code chunk names, so you can use syntax highlighting without sacrificing the literacy of the titles for the code chunks. For example, the code chunk `<<js: for loop>>=` might render as a title in markdown as `## for loop`. To have this highlighting work, make sure to change the `literate.cson` file to include whatever file extensions you are using, e.g.
+
+```
+'fileTypes': [
+  'w'
+  'nw'
+  'noweb'
+  'lsn'
+  'lesen'
+]
+```
 
 ## Why Another?
 There are lots of literate programming tools out there.
@@ -188,4 +203,8 @@ But in the end, I solved my problem. Now literate programming is easy, and I hop
 
 - Add command line option for directing output to a file, like `curl`'s `-o`
 
-- Modularize the logic, break them out into independent modules to be referenced by both scripts
+- Possibly modularize the logic, breaking it out into independent modules to be referenced by both scripts
+
+- build a tool to aid in merging changes to code or documentation that were not made in the corresponding literate file, helping integrate literate programming in teams where not everyone is "literate".
+
+- implement an eliding feature to permit tagging certain blocks to be ignored when producing output - this would permit a sort of commenting feature tailored to your own standards. See [noweb's elide feature](https://www.cs.tufts.edu/~nr/noweb/FAQ.html#toc7), where, for example, you can ignore blocks that start with "comment:" with the filter flag: `noweave -filter elide comment:* ...`

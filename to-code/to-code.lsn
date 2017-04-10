@@ -9,7 +9,7 @@ In the world of literate programming, this would be the equivalent of "tangling"
 Let's take a look at the code.
 
 
-<<imports>>=
+<<py: imports>>=
 import sys
 import re
 import argparse
@@ -18,7 +18,7 @@ I tried to keep the imports to a minimum.
 A large part of the motivation for writing this is due to the complexity or difficulties getting other literate programming tools to build or pull in the proper dependencies.
 I wanted something very simple that just works, and there didn't seem to be a good option for that.
 
-<<parse arguments>>=
+<<py: parse arguments>>=
 # get the arguments from the command line
 parser = argparse.ArgumentParser()
 
@@ -37,7 +37,7 @@ The default root block is `<<*>>=`, if one is not specified. This standard is se
 The `--blockname` option allows the user to specify a different root code block.
 
 
-<<global variables>>=
+<<py: global variables>>=
 if args.blockname is not None:
     MasterBlockName = args.blockname
 else:
@@ -68,7 +68,7 @@ This program "interprets" lesen files line by line.
 `to-code.py` processes the lesen file once over to produce the codeChunks dictionary before it outputs the codeChunks
 
 
-<<process input>>=
+<<py: process input>>=
 if fileName is not None:
     file = open(fileName)
     for line in file: # run through the document once to setup the code chunks
@@ -82,7 +82,7 @@ Here we either open up a file, or we take lines from standard input.
 It feels like there should be a better way to write this such that I don't have to repeat `generateCodeChunks` twice like this.
 
 
-<<generate code chunks function>>=
+<<py: generate code chunks function>>=
 # create dictionary made up of code chunks processed from each line of input
 def generateCodeChunks(line):
     # TODO: remove the reliance on Globals and global declarations
@@ -105,7 +105,7 @@ Talking about `generateCodeChunks`, this function is called for each line.
 It checks to see whether to include the current line as a piece of a code chunk, or to exclude it because it's documentation.
 If the line starts with <<, then we try to parse out a name from the next characters:
 
-<<parse code chunk name>>=
+<<py: parse code chunk name>>=
 previousCodeBlockName = CodeBlockName # backup the code block name
 CodeBlockName = ""
 
@@ -151,7 +151,7 @@ If you find an instance of `<<Y>>`, then you append this reference line to the c
 
 If you find neither instances, then you set your code block name back to how it was previously; and, if this is within a code block, you add this line to it.
 
-<<output code chunks>>=
+<<py: output code chunks>>=
 def processChunk(codeChunkName, prefixPadding=""):
     global codeChunks
     for chunk in codeChunks[codeChunkName]:
@@ -178,13 +178,13 @@ If there is a reference, we use regex to parse out the name and recursively call
 
 We kick off the whole process with a call to `processChunk` using the root chunk name, `MasterBlockName` as the first chunk to output.
 
-<<to-code.py>>=
-<<imports>>
-<<parse arguments>>
-<<global variables>>
-<<generate code chunks function>>
-<<process input>>
-<<output code chunks>>
+<<py: to-code.py>>=
+<<py: imports>>
+<<py: parse arguments>>
+<<py: global variables>>
+<<py: generate code chunks function>>
+<<py: process input>>
+<<py: output code chunks>>
 @
 
 Finally, we have the program as a whole.
