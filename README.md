@@ -16,7 +16,8 @@
 
   This was an important feature, to match [Unix philosophy](http://www.faqs.org/docs/artu/ch01s06.html):
   > Write programs to handle text streams, because that is a universal interface
-  > - Doug McIlroy
+
+  > \- Doug McIlroy
 
 - Produces standard output
 
@@ -28,9 +29,9 @@
 
 ### to-documentation.py
 
-- LaTeX and Markdown modes
+You can specify a document type, and `to-documentation` will handle formatting code blocks for you, among other things including LaTeX's preamble. Currently there are LaTeX and Markdown modes.
 
-  You can specify a document type, and lesen will handle formatting code blocks for you, among other things including LaTeX's preamble.
+If you want, however, you can not specify any format type and just let the separate code and documentation blocks render literally.
 
 #### Examples of Use
 
@@ -42,6 +43,7 @@
 
 ### to-code.py
 
+`to-code` allows you to only render the code blocks from a lesen file.
 
 
 #### Examples of Use
@@ -52,17 +54,13 @@
     # if you want to specify a different root code block, use -n or --blockname
     python -f file.lsn -n main > file.js
 
-		# This is how I generated to-code/src/to-code.py:
-		python to-code.py -f to-code.lsn -n to-code.py > src/to-code.py
-
-
-
-
+    # This is how I generated to-code/src/to-code.py:
+    python to-code.py -f to-code.lsn -n to-code.py > src/to-code.py
 
 
 ## Syntax
 
-The syntax takes after noweb.
+The syntax of lesen is based on [noweb's](http://www.cs.tufts.edu/~nr/noweb/) syntax.
 
 ### Document Blocks
 
@@ -76,7 +74,7 @@ If you need to use @ as the first character in a line of a code block, you can e
 
 `<< ... >>=` is used to start a code block, where `...` designates the name of that block to be referenced later.
 
-The default root code block is `<<*>>=` just like with noweb.
+The default root code block is `<<*>>=`, just like with noweb.
 
 #### References to Code Chunks
 `<< ... >>` can be used in a code block to reference another code block
@@ -99,13 +97,13 @@ The default root code block is `<<*>>=` just like with noweb.
       // this references the above code block
       <<this is a code block>>
 
-I have yet to implement noweb's `[[ ... ]]` syntax for simplified inline-code styling.
+Note: noweb's `[[ ... ]]` syntax for simplified inline-code styling has not been implemented. If someone wants that badly enough, it may be logged as an issue and worked.
 
-#### Syntax Highlighting
+#### IDE Syntax Highlighting with Lesen
 
 You likely want syntax highlighting for both the code chunks and the document chunks.
 
-If you use Github's open source editor, [Atom](https://atom.io/), there is an excellent package named [language-literate](https://github.com/Kerrigan29a/language-literate) you may install. It uses syntax like `<<js: for loop>>=` to tell how to style the code chunk. Lesen's to-documentation tool should ignore these "tags" when rendering titles from the code chunk names, so you can use syntax highlighting without sacrificing the literacy of the titles for the code chunks. For example, the code chunk `<<js: for loop>>=` might render as a title in markdown as `## for loop`. To have this highlighting work, make sure to change the `literate.cson` file to include whatever file extensions you are using, e.g.
+If you use Github's open source editor, [Atom](https://atom.io/), there is an excellent package named [language-literate](https://github.com/Kerrigan29a/language-literate) you may install. It uses syntax like `<<js: for loop>>=` to tell how to style the code chunk. lesen's to-documentation tool should ignore these "tags" when rendering titles from the code chunk names, so you can use syntax highlighting without sacrificing the literacy of the titles for the code chunks. For example, the code chunk `<<js: for loop>>=` might render as a title in markdown as `## for loop`. To have this highlighting work, make sure to change the `literate.cson` file to include whatever file extensions you are using, e.g.
 
 ```
 'fileTypes': [
@@ -117,9 +115,10 @@ If you use Github's open source editor, [Atom](https://atom.io/), there is an ex
 ]
 ```
 
-## Why Another?
+## Why Another Literate Tool?
+
 There are lots of literate programming tools out there.
-Let's survey some basic differences between then, and discuss motivations for creating Lesen.
+Let's survey some basic differences between them and discuss motivations for creating lesen.
 
 ### CWEB, noweb, etc.
 
@@ -143,7 +142,8 @@ I persevered, but at this point I went in search of a more modern version of now
 
 
 ### Modern Tools
-Let's look at a few examples:
+
+Let's look at a few examples of modern literate programming tools.
 
 #### jostylr/literate-programming
 
@@ -155,12 +155,12 @@ Python may not be universal, but it is likely more widespread than node.js and n
 
 Furthermore, I would rather not require installing a package manager to run what should be simple code.
 
->It uses markdown as the basic document format with the code to be weaved together being delimited by each line having 4 spaces as is typical for markdown. Note that it requires spaces but not tabs.
+> It uses markdown as the basic document format with the code to be weaved together being delimited by each line having 4 spaces as is typical for markdown. Note that it requires spaces but not tabs.
 
-Though I set out with LaTeX in mind for Lesen, I wanted to offer flexibility such that weaving tool dictated nothing about what document format you are using.
-I created LaTeX headers and footers, as well as special ways to format the code. Some similar functionality was included for Markdown, but honestly - you could write TeX straight in there and not use Lesen's special functions.
+Though I set out with LaTeX in mind for lesen, I wanted to offer flexibility such that weaving tool dictated nothing about what document format you are using.
+I created LaTeX headers and footers, as well as special ways to format the code. Some similar functionality was included for Markdown, but honestly - you could write TeX straight in there and not use lesen's special functions.
 
-Lesen was designed with flexibility in mind - for both what kind of code you are writing, and what kind of documentation you are trying to write.
+lesen was designed with flexibility in mind - for both what kind of code you are writing, and what kind of documentation you are trying to write.
 
 #### jashkenas/docco
 
@@ -182,16 +182,16 @@ No makefiles, no complexity - just simple, easy, and type-agnostic.
 
 ### Conclusion
 
-In the end, I was dissatisfied. I wanted something super easy to use. Not just that, but the promises of literate programming meant that our tools should be _more_ accessible, and easier to learn and understand.
+In the end, I was dissatisfied. I wanted something exceedingly easy to use. Not just that, but the promises of literate programming meant that our tools should be _more_ accessible, and easier to learn and understand.
 
 Why did every tool I tried seem to quickly jump off the deep end into dependencies, abstractions, and jargon. Why create such high-context words such as `weave` to mean "generate documentation" or `tangle` to mean "extract code"?
-I wanted something more accessible - something low-context.
+I wanted something more accessible, low-context and easy to understand.
 
 Driving home, my mind kept wandering to this problem and I began to fantasize writing my own tool.
 Over time those fantasies became more serious - I realized how simple it could be to implement my own tool.
 
 So I sat down, and in a day had `to-documentation.py` completed. The next day I finished `to-code.py`.
-They aren't perfect. They aren't even finished completely. (And perhaps it could be said they will never be finished, merely abandoned).
+They aren't perfect, and are far from being complete.
 
 There are probably many bugs left lurking, waiting for me to find.
 There are definitely better ways to write the same code, and package it in modules that are simple and powerful.
@@ -202,9 +202,6 @@ But in the end, I solved my problem. Now literate programming is easy, and I hop
 ## TODO:
 
 - Add command line option for directing output to a file, like `curl`'s `-o`
-
-- Possibly modularize the logic, breaking it out into independent modules to be referenced by both scripts
-
+- Possibly modularize the logic, breaking it out into independent modules to be referenced by both scripts, additionally allowing better configuration for adding your own documentation syntax (besides just markdown and LaTeX).
 - build a tool to aid in merging changes to code or documentation that were not made in the corresponding literate file, helping integrate literate programming in teams where not everyone is "literate".
-
 - implement an eliding feature to permit tagging certain blocks to be ignored when producing output - this would permit a sort of commenting feature tailored to your own standards. See [noweb's elide feature](https://www.cs.tufts.edu/~nr/noweb/FAQ.html#toc7), where, for example, you can ignore blocks that start with "comment:" with the filter flag: `noweave -filter elide comment:* ...`
