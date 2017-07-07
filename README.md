@@ -17,7 +17,7 @@
   This was an important feature, to match [Unix philosophy](http://www.faqs.org/docs/artu/ch01s06.html):
   > Write programs to handle text streams, because that is a universal interface
 
-  > \- Doug McIlroy
+  \- Doug McIlroy
 
 - Produces standard output
 
